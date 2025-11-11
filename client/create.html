@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Resume</title>
+    <link rel="shortcut icon" href="input.png" type="image/x-icon">
+    <link rel="stylesheet" href="create.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AI Resume Builder</h1>
+
+        <form id="resumeForm">
+           <label for="name">Full Name</label>
+           <input type="text" id="name" required>
+
+           <label for="email">Email</label>
+           <input type="text" id="email" required>
+           
+           <label for="phone">Phone Number</label>
+           <input type="tel" id="phone" required>
+
+           <label for="address">Address</label>
+           <textarea id="address" rows="2"></textarea>
+
+           <label for="objective">Career Objective</label>
+           <textarea id="objective" rows="3" placeholder="Let AI suggest something..."></textarea>
+
+           <label for="education">Education</label>
+           <textarea id="education" rows="3" required></textarea>
+
+           <label for="skills">Skills</label>
+           <input type="text" id="skills">
+
+           <label for="experience">Experience</label>
+           <textarea id="experience" rows="3"></textarea>
+
+           <label for="projects">Projects</label>
+           <textarea id="projects" rows="3"></textarea>
+
+           <label for="certifications">Certifications</label>
+           <textarea id="certifications" rows="2"></textarea>
+
+           <label for="template">Template Style</label>
+           <select id="template">
+              <option value="classic">Classic</option>
+              <option value="modern">Modern</option>
+              <option value="professional">Professional</option>
+           </select>
+
+           <label for="font">Font Style</label>
+           <select id="font">
+              <option value="Arial">Arial</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Roboto">Roboto</option>
+           </select>
+
+           <label for="fontColor">Font Color</label>
+           <input type="color" id="fontColor">
+
+           <label for="color">Accent Color</label>
+           <input type="color" id="color">
+
+           <button type="submit">Generate Resume</button>
+        </form>
+    </div>
+    <script src="create.js"></script>
+</body>
+</html>
