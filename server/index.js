@@ -1,15 +1,15 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
-const PDFDocument = require('pdfkit');
 const path = require('path');
-
+const fs = require('fs').promises;
+const fs_e = require('fs')
+const { GoogleGenAI } = require("@google/genai");
+const puppeteer = require('puppeteer');
 const app = express();
 const PORT = 3001;
 
 // Gemini API key
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_API_KEY = 'AIzaSyCDdJs3VrQFam5x7Kf7JyufGxHiHHkltIQ';
 
 app.use(cors({
   origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -23,52 +23,164 @@ app.get('/api/test', (req, res) => res.json({ message: 'Backend is working' }));
 app.get('/create', (req, res) => res.sendFile(path.join(__dirname, '../client/create.html')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../client/index.html')));
 
-// ---------------- POST route ----------------
+
 app.post('/api/generate-resume', async (req, res) => {
+  let filePath = null;
+
   try {
     const formData = req.body;
 
-    // Call AI to rewrite key sections
-    const aiResume = await getAIResume(formData);
+    // Generate the PDF file
+    const fileName = `${formData.name || 'resume'}.pdf`;
+    filePath = path.join(__dirname, 'upload', fileName);
 
-    // Generate PDF
-    const pdfBuffer = await generatePDFFromAI(aiResume, formData.fontColor, formData.color);
+    const pdf = await generatePDFFromAI(formData);
+    console.log("pdf generated..")
 
+    // Check if the file exists
+    if (!pdf) {
+      console.log("pdf not found")
+      return res.status(404).send('PDF not found');
+    }
+
+    const pdfStream = fs_e.createReadStream(filePath);
+    const stat = fs_e.statSync(filePath);
+
+    // Set headers to trigger browser download
+    res.setHeader('Content-Length', stat.size);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="resume-${formData.name}.pdf"`);
-    res.send(pdfBuffer);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Cache-Control', 'no-store');
+
+    // Handle successful stream completion
+    pdfStream.on('end', () => {
+      console.log('File stream completed, deleting file...');
+      deleteFile(filePath);
+    });
+
+    // Handle client disconnect/abort
+    res.on('close', () => {
+      if (!res.finished) {
+        console.log('Client disconnected early, deleting file...');
+        deleteFile(filePath);
+      }
+    });
+
+    // Pipe the stream to response
+    pdfStream.pipe(res);
+
+    // Handle potential errors during streaming
+    pdfStream.on('error', (err) => {
+      console.error('Error streaming PDF:', err);
+      deleteFile(filePath); // Delete file on stream error
+      res.status(500).send('Error streaming PDF');
+    });
 
   } catch (error) {
-    console.error('Error generating resume:', error);
+    console.error('❌ Error generating resume:', error);
+    if (filePath) {
+      deleteFile(filePath); // Delete file on any other error
+    }
     res.status(500).json({ error: 'Failed to generate resume', details: error.message });
   }
 });
 
-// ---------------- AI Call ----------------
-async function getAIResume(data) {
-  const prompt = `
-You are a professional resume writer. 
-Take the user's raw input and rewrite it into a polished, interview-ready resume. 
-Return strictly as JSON. All text must be professionally formatted, action-oriented, and modern. Use bullets for multi-item sections.
-
-JSON format:
-{
-  "contact": {
-    "name": "",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "linkedin": "",
-    "portfolio": ""
-  },
-  "summary": "",
-  "education": [],
-  "skills": [],
-  "experience": [],
-  "projects": [],
-  "certifications": []
+// --------------delete files--------------
+async function deleteFile(filePath) {
+  try {
+    await fs.unlink(filePath);
+    console.log('File deleted successfully:', filePath);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log('File already deleted:', filePath);
+    } else {
+      console.error('Error deleting file:', err);
+    }
+  }
 }
 
+//---------------read file----------------
+async function readFile() {
+  try {
+    const data = await fs.readFile('assets/templates/template.html', { encoding: 'utf8' });
+    return data
+  } catch (err) {
+    console.error('Error reading file:', err);
+  }
+}
+
+// ---------------- AI Call ----------------
+async function getAIResume(data) {
+
+const template =await readFile()
+  const systemInstruction = `
+You are a professional web designer and layout optimizer.
+
+Generate a COMPLETE, single-file HTML resume closely matching the design of the following layout:
+
+- Clean, modern theme using colors:
+  --primary: ${data.fontColor},#205b6a
+  --secondary:${data.color}
+  --text: #333
+  --background: #f8f8f8
+- Fonts: "Poppins" for headings, "Inter" for body with combination of ${data.font}
+- Rounded edges, subtle shadows, and consistent spacing
+- Responsive for web preview
+- strictly optimized for A4/Letter export using converting INTO PDF using nodejs puppeteer library.
+
+The HTML must:
+1. Be completely self-contained (no external links or font CDNs).
+2. Use inline or internal CSS only.
+3. Use exact printable width/height proportions: 210mm × 297mm.
+4. Include a "@media print" section that:
+   - Removes all shadows/backgrounds.
+   - Keeps text readable with black color.
+   - Prevents page breaks inside sections.
+   - Uses 0.5in margins.
+5. Use millimeters or centimeters for sizing instead of px.
+
+DYNAMIC HEIGHT ADJUSTMENT LOGIC:
+If total content height exceeds A4/Letter page ratio:
+- Automatically compress vertical space using smaller margins/paddings.
+- Slightly reduce font-size using "clamp()" and "calc()".
+- Compact multi-item lists (e.g., projects, experiences, skills) into 2-column grids.
+- Merge long sections with subtle dividers instead of large spacing.
+- Ensure the final rendered page never exceeds one A4 page height (when viewed or printed).
+
+Left column:
+- Profile photo placeholder
+- Contact information
+- Skills list with small rounded boxes
+- Education timeline
+- Certifications
+
+Right column:
+- Name and title header
+- Objective / Summary
+- Experience (role, org, details)
+- Projects (title, short description, link)
+- Achievements / Technical Proficiencies (if needed)
+
+DESIGN BEHAVIOR:
+- Match proportions, typography, and spacing of the existing index.html file.
+- Maintain the same section hierarchy and visual order.
+- Keep hover effects minimal.
+- Maintain box shadows only for screen mode (remove in print mode).
+- Preserve color identity and professional aesthetic.
+- nothing should overflow or underflow , it should be a good looking pdf output
+- it should not have unnecessary space,padding.
+- **ehnace every section with details description**.
+TEMPLATE:
+follow this template:
+${template}
+OUTPUT:
+Generate the full HTML with embedded CSS that:
+- Auto-adjusts vertically for longer content.
+- Fits perfectly on one A4 page when converted with html2pdf.js.
+- Returns ONLY valid HTML code (no markdown, explanations, or comments).
+`;
+
+  const contexts = `
 Input Data:
 Name: ${data.name}
 Email: ${data.email}
@@ -83,117 +195,56 @@ Certifications: ${data.certifications}
 `;
 
   try {
-    const response = await axios.post(
-      `${GEMINI_URL}?key=${GEMINI_API_KEY}`,
-      {
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 2000 }
-      },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
+    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-    const aiText = response.data.candidates[0].content.parts[0].text;
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: contexts,
+      config: {
+        systemInstruction: systemInstruction,
+      }
+    });
 
-    // Try parsing JSON from AI output
-    try {
-      const jsonStart = aiText.indexOf('{');
-      const jsonEnd = aiText.lastIndexOf('}') + 1;
-      const jsonString = aiText.substring(jsonStart, jsonEnd);
-      const parsed = JSON.parse(jsonString);
-
-      // Ensure contact info is correct
-      parsed.contact.name = data.name || parsed.contact.name;
-      parsed.contact.email = data.email || parsed.contact.email;
-      parsed.contact.phone = data.phone || parsed.contact.phone;
-      parsed.contact.address = data.address || parsed.contact.address;
-      parsed.contact.linkedin = `linkedin.com/in/${data.name?.toLowerCase().replace(/\s+/g, '-')}`;
-      parsed.contact.portfolio = `${data.name?.toLowerCase().replace(/\s+/g,'')}.dev`;
-
-      return parsed;
-    } catch (err) {
-      console.error('Error parsing AI JSON, fallback to raw input.', err);
-      return mapFormDataToJSON(data);
-    }
+    let aiText = response.text;
+    const sub_str1 = "```html";
+    const sub_str2 = "```";
+    aiText = aiText.replace(sub_str1,"");
+    aiText = aiText.replace(sub_str2,"");
+    return aiText;
 
   } catch (err) {
-    console.error('Gemini API call failed:', err.message);
-    return mapFormDataToJSON(data); // fallback
+    console.error('AI API error:', err);
+    alert("something wrong while generating resume,\nplease try agian")
+    return false
   }
 }
 
-// ---------------- Fallback ----------------
-function mapFormDataToJSON(data) {
-  const splitToArray = str => str ? str.split(/[\n,;•-]+/).map(s => s.trim()).filter(Boolean) : [];
 
-  return {
-    contact: {
-      name: data.name || 'N/A',
-      email: data.email || 'N/A',
-      phone: data.phone || 'N/A',
-      address: data.address || 'N/A',
-      linkedin: `linkedin.com/in/${data.name?.toLowerCase().replace(/\s+/g,'-') || 'N/A'}`,
-      portfolio: `${data.name?.toLowerCase().replace(/\s+/g,'') || 'portfolio'}.dev`
-    },
-    summary: data.objective || 'Dedicated professional with strong technical skills.',
-    education: splitToArray(data.education),
-    skills: splitToArray(data.skills),
-    experience: splitToArray(data.experience),
-    projects: splitToArray(data.projects),
-    certifications: splitToArray(data.certifications)
-  };
-}
 
 // ---------------- PDF Generation ----------------
-async function generatePDFFromAI(resume, fontColor = '#000000', accentColor = '#007bff') {
-  return new Promise((resolve, reject) => {
-    try {
-      const doc = new PDFDocument({ margin: 50, size: 'A4' });
-      const buffers = [];
-      doc.on('data', buffers.push.bind(buffers));
-      doc.on('end', () => resolve(Buffer.concat(buffers)));
+async function generatePDFFromAI(data) {
+  try{
+    const browser = await  puppeteer.launch()
+    const page = await browser.newPage()
 
-      // Header
-      doc.fillColor(accentColor).font('Helvetica-Bold').fontSize(22)
-         .text(resume.contact.name.toUpperCase(), { align: 'center' });
-      doc.fillColor(fontColor).font('Helvetica').fontSize(12)
-         .text('Professional Resume', { align: 'center' });
-      doc.moveDown(1);
-      doc.moveTo(50, doc.y).lineTo(550, doc.y).strokeColor(accentColor).lineWidth(1).stroke();
-      doc.moveDown(0.5);
-
-      // Contact
-      const c = resume.contact;
-      doc.fillColor(fontColor).font('Helvetica').fontSize(10)
-         .text(`Email: ${c.email} | Phone: ${c.phone} | Address: ${c.address}`, { align: 'center' });
-      doc.text(`LinkedIn: ${c.linkedin} | Portfolio: ${c.portfolio}`, { align: 'center' });
-      doc.moveDown(1);
-
-      // Helper to add section
-      const addSection = (title, content, isArray=false) => {
-        if (!content || (Array.isArray(content) && content.length === 0)) return;
-        doc.fillColor(accentColor).font('Helvetica-Bold').fontSize(14).text(title.toUpperCase());
-        doc.moveDown(0.2);
-        doc.fillColor(fontColor).font('Helvetica').fontSize(11);
-        if (isArray) content.forEach(item => doc.text(`• ${item}`, { lineGap: 2 }));
-        else doc.text(content, { lineGap: 2, align: 'justify' });
-        doc.moveDown(0.5);
-      };
-
-      addSection('Professional Summary', resume.summary);
-      addSection('Education', resume.education, true);
-      addSection('Technical Skills', resume.skills, true);
-      addSection('Professional Experience', resume.experience, true);
-      addSection('Projects', resume.projects, true);
-      addSection('Certifications', resume.certifications, true);
-      addSection('References', ['Available upon request'], true);
-
-      doc.end();
-    } catch (error) {
-      reject(error);
+    html_from_ai = await getAIResume(data)
+    if(html_from_ai){
+      await page.setContent(html_from_ai);
+      await page.pdf({ path:path.join(__dirname,'upload' ,`${data.name || 'resume'}.pdf`), format: 'A4' });
+      await browser.close();
+      return true;
+    }else{
+      console.log("something goes wrong with ai response")
+      return false;
     }
-  });
+  }
+  catch (error) {
+    console.error("pdf generation error: ",error)
+    reject(error)
+    return false;
+  }
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running: http://localhost:${PORT}`);
+  console.log(`✅ Server running: http://localhost:${PORT}`);
 });
