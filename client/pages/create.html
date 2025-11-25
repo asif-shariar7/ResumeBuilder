@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Resume</title>
+    <link rel="shortcut icon" href="images/input-form.png" type="image/x-icon">
+    <link rel="stylesheet" href="css/create.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav>
+            <div class="nav-container">
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                
+                <div class="nav-menu" id="navMenu">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="/create" class="nav-link active">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create Resume</span>
+                    </a>
+                    <a href="/about" class="nav-link">
+                        <i class="fas fa-info-circle"></i>
+                        <span>About</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>AI Resume Builder</h1>
+
+        <form id="resumeForm">
+           <div class="form-grid">
+               <div class="form-group">
+                   <label for="name">Full Name</label>
+                   <input type="text" id="name" required>
+               </div>
+               
+               <div class="form-group">
+                   <label for="email">Email</label>
+                   <input type="text" id="email" required>
+               </div>
+               
+               <div class="form-group">
+                   <label for="phone">Phone Number</label>
+                   <input type="tel" id="phone" required>
+               </div>
+               
+               <div class="form-group full-width">
+                   <label for="address">Address</label>
+                   <textarea id="address" rows="2"></textarea>
+               </div>
+               
+               <div class="form-group full-width">
+                   <label for="objective">Career Objective</label>
+                   <textarea id="objective" rows="3" placeholder="Let AI suggest something..."></textarea>
+               </div>
+               
+               <div class="form-group full-width">
+                   <label for="education">Education</label>
+                   <textarea id="education" rows="3" required></textarea>
+               </div>
+               
+               <div class="form-group full-width">
+                   <label for="skills">Skills</label>
+                   <textarea id="skills" rows="2"></textarea>
+               </div>
+               
+               <div class="form-group full-width">
+                   <label for="experience">Experience</label>
+                   <textarea id="experience" rows="3"></textarea>
+               </div>
+               
+               <div class="form-group full-width">
+                   <label for="projects">Projects</label>
+                   <textarea id="projects" rows="3"></textarea>
+               </div>
+               
+               <div class="form-group full-width">
+                   <label for="certifications">Certifications</label>
+                   <textarea id="certifications" rows="2"></textarea>
+               </div>
+               
+               <div class="form-group">
+                   <label for="languages">Languages</label>
+                   <input type="text" id="languages">
+               </div>
+               
+               <div class="form-group full-width">
+                   <label for="hobbies">Hobbies</label>
+                   <textarea id="hobbies" rows="2"></textarea>
+               </div>
+               
+               <div class="form-group">
+                   <label for="fontColor">Font Color</label>
+                   <input type="color" id="fontColor">
+               </div>
+               
+               <div class="form-group">
+                   <label for="color">Accent Color</label>
+                   <input type="color" id="color" value="#4A90E2">
+               </div>
+           </div>
+  
+            <div class="button-row">
+                <button type="button" id="refreshBtn" class="refresh-btn">Refresh</button>
+                <button type="submit" class="generate-btn">Generate Resume</button>
+            </div>
+        </form>
+    </div>
+    <script src="js/create.js"></script>
+</body>
+</html>

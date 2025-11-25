@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -9,7 +10,7 @@ const app = express();
 const PORT = 3001;
 
 // Gemini API key
-const GEMINI_API_KEY = 'AIzaSyCDdJs3VrQFam5x7Kf7JyufGxHiHHkltIQ';
+const GEMINI_API_KEY = process.env.API_KEY;
 
 app.use(cors({
   origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -17,12 +18,12 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../client')));
+app.use(express.static(path.join(__dirname,"../client/public")));
 
 app.get('/api/test', (req, res) => res.json({ message: 'Backend is working' }));
-app.get('/create', (req, res) => res.sendFile(path.join(__dirname, '../client/create.html')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../client/index.html')));
-
+app.get('/create', (req, res) => res.sendFile("pages/create.html",{root:__dirname+"/../client"}));
+app.get('/', (req, res) => res.sendFile("pages/index.html",{root:__dirname+"/../client"}));
+app.get('/about',(req,res)=> res.sendFile("pages/about.html",{root:__dirname+"/../client"}));
 
 app.post('/api/generate-resume', async (req, res) => {
   let filePath = null;
@@ -113,85 +114,137 @@ async function readFile() {
 async function getAIResume(data) {
 
 const template =await readFile()
-  const systemInstruction = `
-You are a professional web designer and layout optimizer.
 
-Generate a COMPLETE, single-file HTML resume closely matching the design of the following layout:
+const systemInstruction = `
+You are a professional resume designer specializing in concise, space-optimized 2-page A4 resumes.
 
-- Clean, modern theme using colors:
-  --primary: ${data.fontColor},#205b6a
-  --secondary:${data.color}
-  --text: #333
-  --background: #f8f8f8
-- Fonts: "Poppins" for headings, "Inter" for body with combination of ${data.font}
-- Rounded edges, subtle shadows, and consistent spacing
-- Responsive for web preview
-- strictly optimized for A4/Letter export using converting INTO PDF using nodejs puppeteer library.
+Generate a COMPLETE single-file HTML resume using the provided template.
+The resume MUST fit strictly within 2 A4 pages.
 
-The HTML must:
-1. Be completely self-contained (no external links or font CDNs).
-2. Use inline or internal CSS only.
-3. Use exact printable width/height proportions: 210mm × 297mm.
-4. Include a "@media print" section that:
-   - Removes all shadows/backgrounds.
-   - Keeps text readable with black color.
-   - Prevents page breaks inside sections.
-   - Uses 0.5in margins.
-5. Use millimeters or centimeters for sizing instead of px.
+-----------------------------------
+COLOR RULES (MANDATORY)
+-----------------------------------
+1. ACCENT COLOR: ${data.color}
+   Use ONLY for these section titles:
+   - Career Objective
+   - Education
+   - Technical Skills
+   - Experience
+   - Projects
+   - Certifications
+   - Hobbies
+   - Languages
 
-DYNAMIC HEIGHT ADJUSTMENT LOGIC:
-If total content height exceeds A4/Letter page ratio:
-- Automatically compress vertical space using smaller margins/paddings.
-- Slightly reduce font-size using "clamp()" and "calc()".
-- Compact multi-item lists (e.g., projects, experiences, skills) into 2-column grids.
-- Merge long sections with subtle dividers instead of large spacing.
-- Ensure the final rendered page never exceeds one A4 page height (when viewed or printed).
+2. FONT COLOR: ${data.fontColor}
+   Use for ALL other text:
+   - Name (h1)
+   - Contact information
+   - Section content and bullet points
+   - Dates, CGPA, institution names
+   - Section borders/underlines
+   - All other text not explicitly listed in "accent color" section
 
-Left column:
-- Profile photo placeholder
-- Contact information
-- Skills list with small rounded boxes
-- Education timeline
-- Certifications
+-----------------------------------
+CONTACT FORMAT (FIXED)
+-----------------------------------
+Display contact information horizontally using ONLY:
+📧 ${data.email}
+📱 ${data.phone}
+📍 ${data.address}
 
-Right column:
-- Name and title header
-- Objective / Summary
-- Experience (role, org, details)
-- Projects (title, short description, link)
-- Achievements / Technical Proficiencies (if needed)
+No other emojis allowed.
 
-DESIGN BEHAVIOR:
-- Match proportions, typography, and spacing of the existing index.html file.
-- Maintain the same section hierarchy and visual order.
-- Keep hover effects minimal.
-- Maintain box shadows only for screen mode (remove in print mode).
-- Preserve color identity and professional aesthetic.
-- nothing should overflow or underflow , it should be a good looking pdf output
-- it should not have unnecessary space,padding.
-- **ehnace every section with details description**.
-TEMPLATE:
-follow this template:
+-----------------------------------
+PAGE LAYOUT STRUCTURE
+-----------------------------------
+PAGE 1:
+- Header (name + contact)
+- Career Objective (concise refinement)
+- Education
+- Two-column block:
+  • Left: Technical Skills
+  • Right: Languages + Hobbies
+
+PAGE 2:
+- Experience (top)
+- Projects (middle)
+- Certifications (bottom, compact line-by-line format)
+
+-----------------------------------
+CONTENT RULES
+-----------------------------------
+- Light refinement only (grammar, clarity, concise wording)
+- MUST include all user-provided text
+- Technical Skills: compact list (no percentages)
+- Experience: max 2-3 concise bullet points per role
+- Projects: 1-2 line descriptions
+- Certifications: compact single-line format
+
+-----------------------------------
+SPACE & RENDERING REQUIREMENTS
+-----------------------------------
+- Use grid/two-column layouts where needed to save space
+- Minimize vertical spacing and remove redundancy
+- Ensure ALL content fits exactly within 2 A4 pages
+- Entire resume horizontally centered: margin: 0 auto;
+- Prevent cutoffs with:
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+
+
+-----------------------------------
+CRITICAL RULES - MUST FOLLOW:
+-----------------------------------
+- All sections must present in resume.
+- MUST include all user-provided text with light refinement only (grammar, clarity, concise wording).
+- Ensure all section content stays together on the same page without splitting across multiple pages - use page-break-inside: avoid and proper spacing control.
+- Expand and enhance all content/sections with detailed, professional descriptions but must not go above 2 pages resume:
+   - CAREER OBJECTIVE: Transform into 2-3 compelling sentences showing passion, skills, and career goals
+   - EDUCATION: Add relevant coursework, academic achievements, and key learnings
+   - EXPERIENCE: Expand with specific responsibilities, technologies used, and quantifiable impacts
+   - HOBBIES: Elaborate with meaningful context showing personality and transferable skills
+   - Use professional language and industry-specific terminology
+   - Make content engaging and impactful for recruiters
+   - MAXIMUM CONTENT WIDTH: 700px or 180mm for A4 paper
+   - Use word-wrap: break-word and overflow-wrap: break-word on ALL text elements
+   - Implement text-overflow: ellipsis for very long content
+   - Use box-sizing: border-box globally to prevent padding/margin overflow
+   - Table columns MUST be responsive and wrap properly
+   - Ensure no horizontal scrolling or content cutoff
+   - Test that all text fits within A4 page boundaries (210mm width)
+
+
+-----------------------------------
+TEMPLATE
+-----------------------------------
 ${template}
-OUTPUT:
-Generate the full HTML with embedded CSS that:
-- Auto-adjusts vertically for longer content.
-- Fits perfectly on one A4 page when converted with html2pdf.js.
-- Returns ONLY valid HTML code (no markdown, explanations, or comments).
 `;
 
-  const contexts = `
+
+const contexts = `
 Input Data:
 Name: ${data.name}
 Email: ${data.email}
 Phone: ${data.phone}
-Address: ${data.address || 'N/A'}
-Objective: ${data.objective || 'Dedicated professional with strong technical skills.'}
+Address: ${data.address}
+Objective: ${data.objective}
 Education: ${data.education}
 Skills: ${data.skills}
 Experience: ${data.experience}
 Projects: ${data.projects}
 Certifications: ${data.certifications}
+Languages: ${data.languages}
+Hobbies: ${data.hobbies}
+
+LAYOUT RULES:
+- Must fit exactly within 2 A4 pages.
+- Use ONLY 📧 📱 📍 for contact information in a compact horizontal line.
+- Place Languages and Hobbies beside Technical Skills in a two-column layout (Page 1).
+- Place Certifications compactly on Page 2 (bottom).
+- Projects must be 1-2 line descriptions.
+- Use spacing, grids, and compact formatting to avoid empty gaps and page overflow.
+- Include all user text with light refinement for grammar and conciseness.
 `;
 
   try {

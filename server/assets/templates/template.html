@@ -3,15 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Md Yousuf Mazumder - Resume</title>
+<title>Asif Shariar - Resume</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 :root {
   --primary: #1f4e5f;
-  --accent: #8b7be8;
   --bg-light: #f9fafc;
   --text: #2e2e2e;
   --muted: #555;
@@ -22,7 +20,7 @@ body {
 }
 
 .resume {
-  background: #fff;width: 8.27in;max-width: 900px;margin: 30px auto;padding: 45px 55px;box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);border-radius: 10px;page-break-inside: avoid;
+  background: #fff;width: 8.27in;margin: 30px auto;padding: 45px 55px;box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);border-radius: 10px;page-break-inside: avoid;
 }
 
 header {
@@ -33,10 +31,6 @@ header h1 {
   font-family: 'Poppins', sans-serif;font-size: 2.4em;color: var(--primary);margin: 0;
 }
 
-header p.role {
-  color: var(--accent);font-weight: 500;margin-top: 5px;font-size: 1.1em;
-}
-
 .contact {
   margin-top: 10px;display: flex;flex-wrap: wrap;justify-content: center;gap: 18px;font-size: 0.95em;color: var(--muted);
 }
@@ -44,109 +38,71 @@ header p.role {
 .contact i {
   color: var(--primary);margin-right: 6px;
 }
+
 section {
   margin-bottom: 25px;page-break-inside: avoid;
 }
+
 .section-title {
   font-family: 'Poppins', sans-serif;font-size: 1.25em;color: var(--primary);margin-bottom: 10px;border-bottom: 2px solid #eee;padding-bottom: 5px;
 }
+
 p, li {
   font-size: 0.96em;line-height: 1.6;color: var(--text);
 }
-.skills-grid, .projects-grid {
-  display: grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap: 15px;
+
+.skills-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
 }
-.skill {
-  background: var(--bg-light);border-radius: 6px;padding: 10px 12px;
+
+.skills-list li {
+  list-style: disc;
+  margin-left: 20px;
 }
-.skill h3 {
-  margin: 0;color: var(--primary);font-size: 1em;font-weight: 600;
+
+.row-two {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
 }
-.skill-bar {
-  background: #ddd;height: 6px;border-radius: 3px;margin-top: 5px;overflow: hidden;
+
+.row-two > div {
+  width: 50%;
 }
-.skill-level {
-  background: var(--accent);height: 6px;border-radius: 3px;
-}
-.timeline {
-  margin-top: 10px;
-}
-.timeline-item {
-  margin-bottom: 10px;
-}
-.timeline-title {
-  font-weight: 600;color: var(--primary);
-}
-.timeline-content p {
-  margin: 3px 0;color: var(--muted);
-}
-.experience-item {
-  margin-bottom: 15px;
-}
-.experience-title {
-  color: var(--primary);font-weight: 600;
-}
-.project-card {
-  background: var(--bg-light);padding: 12px 15px;border-radius: 6px;
-}
-.project-card h3 {
-  color: var(--primary);font-size: 1em;font-weight: 600;margin: 0;
-}
-.project-card p {
-  font-size: 0.9em;margin: 5px 0;
-}
-.project-card a {
-  font-size: 0.88em;text-decoration: none;color: var(--accent);
-}
-.certification-item {
-  margin-bottom: 8px;font-size: 0.95em;color: var(--muted);
-}
+
 ul {
   margin-top: 5px;padding-left: 18px;
 }
+
 ul li {
   margin-bottom: 6px;
 }
+
+.project-card {
+  background: var(--bg-light);padding: 12px 15px;border-radius: 6px;
+}
+
+.project-card h3 {
+  color: var(--primary);font-size: 1em;font-weight: 600;margin: 0;
+}
+
+.project-card p {
+  font-size: 0.9em;margin: 5px 0;
+}
+
+.certification-item {
+  margin-bottom: 8px;font-size: 0.95em;color: var(--muted);
+}
+
 @media print {
-  body {
-    background: #fff;-webkit-print-color-adjust: exact !important;print-color-adjust: exact !important;margin: 0;padding: 0;
-  }
-  .resume {
-    box-shadow: none;margin: 0;width: 100%;padding: 0;border-radius: 0;max-width: none;
-  }
-  header {
-    padding-top: 0.5in;
-  }
-  section {
-    margin-bottom: 15px;padding: 0 0.5in;
-  }
-  .section-title {
-    page-break-after: avoid;
-  }
-  .skills-grid, .projects-grid {
-    page-break-inside: avoid;
-  }
-  .project-card, .skill {
-    page-break-inside: avoid;
-  }
-  body, p, li {
-    font-size: 11pt;
-  }
-  .section-title {
-    font-size: 13pt;
-  }
-  header h1 {
-    font-size: 22pt;
-  }
-  header p.role {
-    font-size: 12pt;
-  }
-  .contact {
-    font-size: 10pt;
-  }
-  @page {
-    size: A4;margin: 0.5in;
-  }
+  body { background: #fff;-webkit-print-color-adjust: exact !important;print-color-adjust: exact !important;margin: 0;padding: 0; }
+  .resume { box-shadow: none;margin: 0;width: 100%;padding: 0;border-radius: 0;max-width: none; }
+  header { padding-top: 0.5in; }
+  section { margin-bottom: 15px;padding: 0 0.5in; }
+  body, p, li { font-size: 11pt; }
+  @page { size: A4;margin: 0.5in; }
 }
 </style>
 </head>
@@ -154,74 +110,67 @@ ul li {
 <body>
 <main class="resume">
   <header>
-    <h1>Md Yousuf Mazumder</h1>
-    <p class="role">AI Developer</p>
+    <h1>Asif Shariar</h1>
     <div class="contact">
-      <p><i class="fas fa-envelope"></i>md...........@gmail.com</p>
-      <p><i class="fas fa-phone"></i>+88019xxxxxx</p>
-      <p><i class="fas fa-map-marker-alt"></i>my location</p>
+      <p></i>md...........@gmail.com</p>
+      <p></i>+88019xxxxxx</p>
+      <p></i>my location</p>
     </div>
   </header>
 
   <section>
     <h2 class="section-title">Career Objective</h2>
-    <p>
-      <!-- add 2-3 line of description here -->
-    </p>
+    <p> <!-- add 4-5 line of description here --> </p>
   </section>
 
   <section>
     <h2 class="section-title">About Me</h2>
-    <p>
-      <!-- add 2-4 line to summerize data about me and add here -->
-    </p>
+    <p> <!-- add 2-4 line to summerize data about me and add here --> </p>
   </section>
 
   <section>
     <h2 class="section-title">Education</h2>
-    <div class="timeline">
-      <div class="timeline-item">
-        <div class="timeline-content">
-          <h3 class="timeline-title">B.Sc. in Computer Science & Engineering</h3>
-          <p>X College | CGPA: 3.12</p>
+    <div>
+        <div>
+          <h3>B.Sc. in Computer Science & Engineering</h3>
+          <p>X College | CGPA: 3.40</p>
         </div>
-      </div>
-
       <!-- add multiple 'section based on given information' -->
     </div>
   </section>
 
   <section>
     <h2 class="section-title">Technical Skills</h2>
-    <div class="skills-grid">
-      <div class="skill">
-        <h3>Python</h3>
-        <div class="skill-bar"><div class="skill-level" style="width: 90%;"></div></div>
+    <ul class="skills-list">
+      <li>Python</li>
+      <li>HTML / CSS</li>
+      <li>JavaScript</li>
+      <li>MySQL</li>
+      <li>Machine Learning</li>
+      <li>Data Analysis</li>
+      <!-- Add more <li> here based on information -->
+    </ul>
+  </section>
+
+  <section>
+    <h2 class="section-title">Projects</h2>
+    <div>
+      <div class="project-card">
+        <h3>ImageHunt</h3>
+        <p>A lightweight web application that lets users search and explore images from Unsplash using keywords.</p>
       </div>
-      <!-- Add more skills here based on information -->
+        <!-- add more 'project-card' based on the information-->
     </div>
   </section>
 
   <section>
     <h2 class="section-title">Experience</h2>
     <div class="experience-item">
-      <h3 class="experience-title">AI Intern</h3>
+      <h3>AI Intern</h3>
       <p><em>Various Companies</em></p>
-      <p>Worked on practical machine learning projects, involving data preprocessing, feature engineering, and model optimization to enhance predictive performance.</p>
+      <p>Worked on practical machine learning projects involving data preprocessing, feature engineering, and model optimization.</p>
     </div>
     <!-- add more 'experience-item' based on information -->
-  </section>
-
-  <section>
-    <h2 class="section-title">Projects</h2>
-    <div class="projects-grid">
-      <div class="project-card">
-        <h3>Code Editor</h3>
-        <p>Developed a browser-based code editor with syntax highlighting and real-time preview using JavaScript and Web APIs.</p>
-        <a href="github.com/myproject">github.com/myproject</a>
-      </div>
-      <!-- add more 'project-card' based on the information-->
-    </div>
   </section>
 
   <section>
@@ -232,12 +181,38 @@ ul li {
   </section>
 
   <section>
+    <div class="row-two">
+
+      <div>
+        <h2 class="section-title">Languages</h2>
+        <ul>
+          <li>Bangla</li>
+          <li>English</li>
+          <!-- add more <li> based on information -->
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="section-title">Hobbies</h2>
+        <ul>
+          <li>Gaming</li>
+          <li>Sleeping</li>
+          <li>Reading Tech Blogs</li>
+          <!-- add more <li> based on information -->
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
     <h2 class="section-title">Achievements</h2>
     <ul>
       <li>Developed multiple AI-based projects demonstrating analytical and programming expertise.</li>
       <!-- add more <li> for adding Achievements based on data -->
     </ul>
   </section>
+
 </main>
 </body>
 </html>
