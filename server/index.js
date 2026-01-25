@@ -251,7 +251,7 @@ LAYOUT RULES:
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: contexts,
       config: {
         systemInstruction: systemInstruction,
@@ -264,6 +264,7 @@ LAYOUT RULES:
     aiText = aiText.replace(sub_str1,"");
     aiText = aiText.replace(sub_str2,"");
     return aiText;
+    
 
   } catch (err) {
     console.error('AI API error:', err);
