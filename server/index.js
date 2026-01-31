@@ -78,7 +78,7 @@ app.post('/api/generate-resume', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generating resume:', error);
+    console.error('Error generating resume:', error);
     if (filePath) {
       deleteFile(filePath); // Delete file on any other error
     }
@@ -300,5 +300,5 @@ async function generatePDFFromAI(data) {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server running: http://localhost:${PORT}`);
+  console.log(`Server running: http://localhost:${PORT}`);
 });
